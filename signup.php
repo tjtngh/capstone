@@ -13,16 +13,15 @@ $Password = $_POST['Password'];
 $Name = $_POST['Name'];
 $Department = $_POST['Department'];
 $Rank = $_POST['Rank'];
-$AC = $_POST['AC'];
 
 
-$result = mysqli_query($con,"insert into info (ID,Password,Name,Department,Rank,AC) values ('$ID','$Password','$Name','$Department','$Rank',$AC)");
+$result = mysqli_query($con,"insert into signup (ID,Password,Name,Department,Rank) values ('$ID','$Password','$Name','$Department','$Rank')");
 
   if($result){
-    echo '승인';
+    echo '가입요청완료';
   }
   else{
-    echo '실패';
+    echo '회원가입실패';
   }
 mysqli_close($con);
 ?>

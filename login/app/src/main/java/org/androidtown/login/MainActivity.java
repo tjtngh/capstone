@@ -19,8 +19,6 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -43,6 +41,8 @@ boolean isPageOpen=false;
     String loginID;
     String loginPassword;
 
+    String ip="http://192.168.123.100/";
+
     SharedPreferences setting;
     SharedPreferences.Editor editor;
     private EditText editid;
@@ -54,8 +54,7 @@ boolean isPageOpen=false;
     private EditText editText2;
     private CheckBox checkBox;
 
-    String myJSON;
-    JSONArray peoples = null;
+    String compare;
     private static final String TAG_RESULTS="result";
     private static final String TAG_END="end";
     ArrayList<HashMap<String, String>> personList;
@@ -115,10 +114,21 @@ boolean isPageOpen=false;
             editText.setText(setting.getString("ID",""));
             editText2.setText(setting.getString("PW",""));
             checkBox.setChecked(true);
-            Intent intent = new Intent(this, administrator.class);
-            startActivity(intent);
-            finish();
-            Toast.makeText(this,"자동 로그인",Toast.LENGTH_SHORT).show();
+            if(editText.getText().toString().equals("admin")) {
+                Intent intent = new Intent(this, administrator.class);
+                startActivity(intent);
+                finish();
+                Toast.makeText(this, "자동 로그인", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                Intent intent = new Intent(this, user.class);
+                intent.putExtra("ID", editText.getText().toString());
+                intent.putExtra("PW", editText2.getText().toString());
+                startActivity(intent);
+                finish();
+                Toast.makeText(this, "자동 로그인", Toast.LENGTH_SHORT).show();
+            }
         }
 
 
@@ -129,88 +139,27 @@ boolean isPageOpen=false;
         String Name=editname.getText().toString();
         String Department=editdepartment.getText().toString();
         String Rank=editrank.getText().toString();
-
-        if(!ID.isEmpty()&&!Password.isEmpty()&&!Name.isEmpty()) {
-            insertToDatabase(ID, Password, Name, Department, Rank);
+        String address=ip+"signup.php";
+if(ID.length()<=10&&Password.length()<=10)
+        if(!ID.isEmpty()&&!Password.isEmpty()&&!Name.isEmpty()&&!Department.isEmpty()&&!Rank.isEmpty()&&editid.getText().toString().equals(compare)) {
+            LoadToDatabase(ID, Password, Name, Department, Rank,"0",address);
             editid.setText("");
             editpassword.setText("");
             editname.setText("");
             editdepartment.setText("");
             editrank.setText("");
+            slidingPage02.setVisibility(View.GONE);
+            slidingPage01.setVisibility(View.VISIBLE);
+            slidingPage01.startAnimation(transleft);
+            Toast.makeText(this,"회원가입 요청완료",Toast.LENGTH_SHORT).show();
         }
+        else if(!editid.getText().toString().equals(compare))
+            Toast.makeText(this,"아이디 중복확인을 해주세요",Toast.LENGTH_SHORT).show();
         else
-            Toast.makeText(this,"필수항목을 입력해주세요",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"모든항목을 입력해주세요",Toast.LENGTH_SHORT).show();
     }
 
-    private void insertToDatabase(String ID, String Password,String Name,String Department,String Rank){
-
-        class InsertData extends AsyncTask<String, Void, String> {
-            ProgressDialog loading;
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                loading = ProgressDialog.show(MainActivity.this, "Please Wait", null, true, true);
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-                super.onPostExecute(s);
-                loading.dismiss();
-                Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            protected String doInBackground(String... params) {
-
-                try{
-                    String ID = (String)params[0];
-                    String Password = (String)params[1];
-                    String Name = (String)params[2];
-                    String Department = (String)params[3];
-                    String Rank = (String)params[4];
-
-                    String link="http://192.168.123.103/info.php";
-                    String data  = URLEncoder.encode("ID", "UTF-8") + "=" + URLEncoder.encode(ID, "UTF-8");
-                    data += "&" + URLEncoder.encode("Password", "UTF-8") + "=" + URLEncoder.encode(Password, "UTF-8");
-                    data += "&" + URLEncoder.encode("Name", "UTF-8") + "=" + URLEncoder.encode(Name, "UTF-8");
-                    data += "&" + URLEncoder.encode("Department", "UTF-8") + "=" + URLEncoder.encode(Department, "UTF-8");
-                    data += "&" + URLEncoder.encode("Rank", "UTF-8") + "=" + URLEncoder.encode(Rank, "UTF-8");
-
-                    URL url = new URL(link);
-                    URLConnection conn = url.openConnection();
-
-                    conn.setDoOutput(true);
-                    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-
-                    wr.write( data );
-                    wr.flush();
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-
-                    // Read Server Response
-                    while((line = reader.readLine()) != null)
-                    {
-                        sb.append(line);
-                        break;
-                    }
-                    return sb.toString();
-                }
-                catch(Exception e){
-                    return new String("Exception: " + e.getMessage());
-                }
-
-            }
-        }
-
-        InsertData task = new InsertData();
-       task.execute(ID,Password,Name,Department,Rank);
-    }
-
-    private void LoadToDatabase(String ID, String Password){
+    private void LoadToDatabase(String ID, String Password, String Name, String Department, String Rank, String AC, final String address){
 
         class LoadToData extends AsyncTask<String, Void, String> {
             ProgressDialog loading;
@@ -225,7 +174,7 @@ boolean isPageOpen=false;
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 loading.dismiss();
-                Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
+
             }
 
             @Override
@@ -234,11 +183,19 @@ boolean isPageOpen=false;
                 try{
                     String ID = (String)params[0];
                     String Password = (String)params[1];
+                    String Name = (String)params[2];
+                    String Department = (String)params[3];
+                    String Rank = (String)params[4];
+                    String AC=(String)params[5];
 
 
-                    String link="http://192.168.123.103/load.php";
+                    String link=address;
                     String data  = URLEncoder.encode("ID", "UTF-8") + "=" + URLEncoder.encode(ID, "UTF-8");
                     data += "&" + URLEncoder.encode("Password", "UTF-8") + "=" + URLEncoder.encode(Password, "UTF-8");
+                    data += "&" + URLEncoder.encode("Name", "UTF-8") + "=" + URLEncoder.encode(Name, "UTF-8");
+                    data += "&" + URLEncoder.encode("Department", "UTF-8") + "=" + URLEncoder.encode(Department, "UTF-8");
+                    data += "&" + URLEncoder.encode("Rank", "UTF-8") + "=" + URLEncoder.encode(Rank, "UTF-8");
+                    data += "&" + URLEncoder.encode("AC", "UTF-8") + "=" + URLEncoder.encode(AC, "UTF-8");
 
 
                     URL url = new URL(link);
@@ -277,31 +234,48 @@ boolean isPageOpen=false;
         }
 
         LoadToData task = new LoadToData();
-        task.execute(ID,Password);
+        task.execute(ID,Password,Name,Department,Rank,AC);
     }
 
 
 
 
-   public void Click1(View v){
+
+    public void Click1(View v){
        String ID=editText.getText().toString();
        String Password=editText2.getText().toString();
-
+        String address1 = ip + "admin.php";
+        String address2 = ip + "load.php";
        if(!ID.isEmpty()&&!Password.isEmpty())
-       LoadToDatabase(ID,Password);
+       {
+           if (ID.equals("admin"))
+               LoadToDatabase(ID, Password, "0", "0", "0", "0", address1);
+           else
+               LoadToDatabase(ID, Password, "0", "0", "0", "0", address2);
+       }
        else
        Toast.makeText(this,"모두 입력해주세요",Toast.LENGTH_SHORT).show();
 
-       this.sleep(2000);
+       this.sleep(1500);
 
            if (result != null) {
-               if (result.equalsIgnoreCase("로그인성공")) {
+               if(ID.equals("admin")&&result.equals("관리자로그인"))
+               {
                    Intent intent = new Intent(this, administrator.class);
+                   Toast.makeText(MainActivity.this, "관리자로그인", Toast.LENGTH_SHORT).show();
+                   startActivity(intent);
+                   finish();
+               }
+               else if (result.equalsIgnoreCase("로그인성공")) {
+                   Intent intent = new Intent(this, user.class);
+                   intent.putExtra("ID", ID);
+                   intent.putExtra("PW", Password);
+                   Toast.makeText(MainActivity.this, "로그인성공", Toast.LENGTH_SHORT).show();
                    startActivity(intent);
                    finish();
                }
                else
-                   Toast.makeText(MainActivity.this, "로그인실패", Toast.LENGTH_LONG).show();
+                   Toast.makeText(MainActivity.this, "로그인실패", Toast.LENGTH_SHORT).show();
            }
 
 
@@ -309,20 +283,22 @@ boolean isPageOpen=false;
     public void Click2(View v){
         if(isPageOpen){
             slidingPage01.startAnimation(transright);
-        slidingPage02.setVisibility(View.VISIBLE);}
+            slidingPage02.setVisibility(View.VISIBLE);
+            }
         else{
-            slidingPage01.setVisibility(View.VISIBLE);
             slidingPage02.setVisibility(View.GONE);
+            slidingPage01.setVisibility(View.VISIBLE);
             slidingPage01.startAnimation(transleft);
         }
     }
     public void onButton1Clicked(View v) {
         if (isPageOpen) {
             slidingPage01.startAnimation(transright);
+            slidingPage01.setVisibility(View.GONE);
             slidingPage02.setVisibility(View.VISIBLE);
         } else {
-            slidingPage01.setVisibility(View.VISIBLE);
             slidingPage02.setVisibility(View.GONE);
+            slidingPage01.setVisibility(View.VISIBLE);
             slidingPage01.startAnimation(transleft);
         }
     }
@@ -335,8 +311,8 @@ boolean isPageOpen=false;
         public void onAnimationEnd(Animation animation){
             if(isPageOpen){
                 slidingPage01.setVisibility(View.GONE);
-                slidingPage02.setVisibility(View.VISIBLE);
                 button1.setVisibility(View.GONE);
+                slidingPage02.setVisibility(View.VISIBLE);
                 isPageOpen=false;
             }
             else{
@@ -362,43 +338,17 @@ boolean isPageOpen=false;
         imm.hideSoftInputFromWindow(slidingPage02.getWindowToken(), 0);
     }
 
+    public void sameclick(View v){
+        String ID=editid.getText().toString();
+        String address=ip+"same.php";
+        LoadToDatabase(ID,"0","0","0","0","0",address);
+        sleep(1500);
+        if(result.equals("사용 가능합니다.")&&ID.length()<=10) {
+            Toast.makeText(this,"사용 가능합니다.",Toast.LENGTH_SHORT).show();
+            compare = editid.getText().toString();
+        }
+        else
+            Toast.makeText(this,"사용 불가능합니다.",Toast.LENGTH_SHORT).show();
+    }
 
-    /*public void getData(String url){
-               class GetDataJSON extends AsyncTask<String, Void, String>{
-
-                              @Override
-                        protected String doInBackground(String... params) {
-                                  String uri = params[0];
-                                  BufferedReader bufferedReader = null;
-                              try {
-                                        URL url = new URL(uri);
-                                       HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                                     StringBuilder sb = new StringBuilder();
-
-                                        bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-
-                                     String json;
-                                      while((json = bufferedReader.readLine())!= null){
-                                             sb.append(json+"\n");
-                                           }
-                                     String abc=sb.toString();
-                                     if("success".equalsIgnoreCase(sb.toString()))
-                                         Toast.makeText(getApplicationContext(),"로그인 성공",Toast.LENGTH_SHORT).show();
-                                         else
-                                         Toast.makeText(getApplicationContext(),"로그인 실패",Toast.LENGTH_SHORT).show();
-
-                                       return sb.toString().trim();
-
-                                   }catch(Exception e){
-                                     return null;
-                                 }
-                       }
-                             @Override
-                      protected void onPostExecute(String result){
-                              myJSON=result;
-                         }
-                 }
-               GetDataJSON g = new GetDataJSON();
-               g.execute(url);
-            }*/
 }

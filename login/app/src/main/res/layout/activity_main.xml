@@ -15,8 +15,6 @@
         android:layout_height="match_parent"
         android:id="@+id/asdf"
        >
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -122,18 +120,19 @@
     android:layout_height="match_parent"
     android:id="@+id/slidingPage01"
     android:onClick="slidingPage01click"
-    android:visibility="gone">
+    android:visibility="gone"
+   >
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="   *아이디"
+        android:text="    아이디"
         android:textSize="30dp"
         android:id="@+id/id"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="*비밀번호 "
+        android:text=" 비밀번호 "
         android:textSize="30dp"
         android:id="@+id/password"
         android:layout_below="@+id/id"
@@ -141,7 +140,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="       *이름"
+        android:text="        이름"
         android:textSize="30dp"
         android:id="@+id/name"
         android:layout_below="@+id/password"
@@ -171,7 +170,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editid"
-        android:layout_toRightOf="@+id/id"/>
+        android:layout_toRightOf="@+id/id"
+        android:layout_toLeftOf="@+id/same"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -196,7 +196,6 @@
     <EditText
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-
     android:layout_below="@+id/editname"
     android:id="@+id/editdepartment"
     android:paddingTop="25dp"
@@ -205,12 +204,19 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:layout_below="@+id/editdepartment"
         android:id="@+id/editrank"
         android:paddingTop="25dp"
         android:layout_toRightOf="@+id/rank"
         />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="주의 : 아이디, 비밀번호 최대 10자리"
+        android:textColor="#ffff0000"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="20dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -228,7 +234,6 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:text="Open"
         android:onClick="onButton1Clicked"
         android:visibility="gone"
@@ -237,7 +242,17 @@
         android:layout_alignTop="@+id/but1"
         android:layout_alignParentEnd="true" />
 
-</RelativeLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="중복검사"
+        android:id="@+id/same"
+        android:onClick="sameclick"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+       />
+
+</RelativeLayout>
 
 </RelativeLayout>
